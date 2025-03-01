@@ -9,7 +9,7 @@ services:
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --certificatesresolvers.myresolver.acme.tlschallenge=true
-      - --certificatesresolvers.myresolver.acme.email=benita.ukaegbu@gmail.com
+      - --certificatesresolvers.myresolver.acme.email=slanxe15@gmail.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
     ports:
       - "80:80"
@@ -32,7 +32,7 @@ services:
       JWT_SECRET: myfancysecret
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.users-api.rule=Host(users.mytodo.name.ng) || Host(mytodo.name.ng) && PathPrefix(/api/users)"
+      - "traefik.http.routers.users-api.rule=Host(`users.mytodo.name.ng`) || Host(`mytodo.name.ng`) && PathPrefix(`/api/users`)"
       - "traefik.http.routers.users-api.entrypoints=websecure"
       - "traefik.http.routers.users-api.tls.certresolver=myresolver"
     depends_on:
@@ -47,7 +47,7 @@ services:
       USERS_API_ADDRESS: http://users-api:8083
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.auth-api.rule=Host(auth.mytodo.name.ng) || Host(mytodo.name.ng) && PathPrefix(/api/auth)"
+      - "traefik.http.routers.auth-api.rule=Host(`auth.mytodo.name.ng`) || Host(`mytodo.name.ng`) && PathPrefix(`/api/auth`)"
       - "traefik.http.routers.auth-api.entrypoints=websecure"
       - "traefik.http.routers.auth-api.tls.certresolver=myresolver"
     depends_on:
@@ -64,7 +64,7 @@ services:
       REDIS_CHANNEL: log_channel
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.todos-api.rule=Host(todos.mytodo.name.ng) || Host(mytodo.name.ng) && PathPrefix(/api/todos)"
+      - "traefik.http.routers.todos-api.rule=Host(`todos.mytodo.name.ng`) || Host(`mytodo.name.ng`) && PathPrefix(`/api/todos`)"
       - "traefik.http.routers.todos-api.entrypoints=websecure"
       - "traefik.http.routers.todos-api.tls.certresolver=myresolver"
     depends_on:
@@ -79,7 +79,7 @@ services:
       REDIS_PORT: 6379
       REDIS_CHANNEL: log_channel
     ports:
-      - "8084:8080"
+      - "8084:8080"  # Expose a port for debugging
     depends_on:
       - redis-queue
 
@@ -92,7 +92,7 @@ services:
       TODOS_API_ADDRESS: http://todos-api:8082
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(mytodo.name.ng)"
+      - "traefik.http.routers.frontend.rule=Host(`mytodo.name.ng`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
     depends_on:
