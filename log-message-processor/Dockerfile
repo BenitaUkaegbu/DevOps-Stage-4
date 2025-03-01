@@ -1,20 +1,27 @@
-FROM python:3.10-slim
+# Use an official Python runtime as a parent image
+FROM python:3.5-slim
 
+# Set the working directory in the container
 WORKDIR /app
 
-# Install build tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc build-essential python3-dev
+# Install system dependencies (gcc and other build tools)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc python3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy dependency file
+# Copy the requirements file
 COPY requirements.txt .
 
-# Set pip to use a faster mirror and increase timeout
-RUN pip install --upgrade pip
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
-
-# Copy the rest of the app
+# Copy the rest of the application code
 COPY . .
 
-CMD ["python3", "main.py"]
+# Set environment variables
+ENV REDIS_HOST=redis-queue \
+    REDIS_PORT=6379 \
+    REDIS_CHANNEL=log_channel
+
+# Run the application
+CMD ["python", "main.py"]
