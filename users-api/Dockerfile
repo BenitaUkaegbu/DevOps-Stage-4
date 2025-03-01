@@ -1,19 +1,36 @@
-# Stage 1: Build the JAR file
-FROM maven:3.9.6-eclipse-temurin-8 AS build
+# Use Maven with OpenJDK 8 as the base image for building
+FROM maven:3.8.4-openjdk-8 AS build
+
+# Set the working directory inside the container to /app
 WORKDIR /app
 
+# Copy the pom.xml file to the working directory
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
 
-COPY . .
-RUN mvn clean package -DskipTests -B
+# Download all dependencies to be available offline
+RUN mvn dependency:go-offline
 
-# Stage 2: Run the application
-FROM openjdk:8
-WORKDIR /app
+# Copy the source code to the working directory
+COPY src ./src
 
-COPY --from=build /app/target/users-api-0.0.1-SNAPSHOT.jar users-api.jar
+# Build the project and package it into a JAR file, skipping tests
+RUN mvn clean package -DskipTests
 
+# Use a slim version of OpenJDK 8 as the base image for running the application
+FROM openjdk:8-jre-alpine
+
+# Set the working directory inside the container to /usr/src/app
+WORKDIR /usr/src/app
+
+# Copy the JAR file from the build stage
+COPY --from=build /app/target/users-api-0.0.1-SNAPSHOT.jar ./users-api.jar
+
+# Expose port 8083 to allow external access
 EXPOSE 8083
 
-CMD ["java", "-jar", "users-api.jar"]
+# Set environment variable 
+ENV SERVER_PORT=${SERVER_PORT} \
+    JWT_SECRET=${JWT_SECRET}
+
+# Run the JAR file using the java command
+CMD ["java", "-jar", "/usr/src/app/users-api.jar"]
